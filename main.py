@@ -33,10 +33,15 @@ if __name__ == '__main__':
     labels_ph = tf.placeholder(tf.int64, [None])
 
     # Create network
+    """
     with tf.variable_scope('glimps_network', reuse=True) as scope:
         glimps_network = GlimpsNetwork(images_ph)
     with tf.variable_scope('location_network', reuse=True):
         location_network = LocationNetwork()
+    """
+    glimps_network = GlimpsNetwork(images_ph)
+    location_network = LocationNetwork()
+    
     
     # Construct Glimps network (part in core network)
     init_location = tf.random_uniform((batch_size, 2), minval=-1.0, maxval=1.0)
