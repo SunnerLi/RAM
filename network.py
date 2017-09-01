@@ -8,15 +8,25 @@ class GlimpsNetwork(object):
         self.location_ph = location_ph
 
     def getGlimps(self, loc_tensor):
-        self.glimps_imgs = tf.reshape(self.location_ph, [-1, 28, 28, 1], name='reshape_layer_1')
+        self.glimps_imgs = tf.reshape(self.location_ph, [tf.shape(self.location_ph)[0], 28, 28, 1], name='reshape_layer_1')
         self.glimps_imgs = tf.image.extract_glimpse(self.glimps_imgs, [win_size, win_size], loc_tensor)
-        self.glimps_imgs = tf.reshape(self.glimps_imgs, [-1, win_size * win_size * 1])
+        self.glimps_imgs = tf.reshape(self.glimps_imgs, [tf.shape(loc_tensor)[0], win_size * win_size * 1])
         return self.glimps_imgs
 
     def __call__(self, loc_tensor):
         self.retina_imgs = self.getGlimps(loc_tensor)
-        self.retina_imgs = tf.nn.relu(Dense(self.retina_imgs, n_units=128, name='glimps_ind_fc_1'))
-        self.location_net = tf.nn.relu(Dense(loc_tensor, n_units=128, name='glimps_ind_fc_2'))
+        #self.retina_imgs = tf.nn.relu(Dense(self.retina_imgs, n_units=128, name='glimps_ind_fc_1'))
+
+        self.retina_net = Dense(self.retina_imgs, n_units=128, name='glimps_ind_fc_1')
+        self.retina_net = layers.batch_norm(self.retina_net)
+        self.retina_net = tf.nn.relu(self.retina_net)
+
+        #self.location_net = tf.nn.relu(Dense(loc_tensor, n_units=128, name='glimps_ind_fc_2'))
+
+        self.location_net = Dense(loc_tensor, n_units=128, name='glimps_ind_fc_2')
+        self.location_net = layers.batch_norm(self.location_net)
+        self.location_net = tf.nn.relu(self.location_net)
+
         self.glimps_net = tf.concat([self.retina_imgs, self.location_net], axis=-1)
         self.glimps_net = tf.nn.relu(Dense(self.glimps_net, n_units=256, name='glimps_merge_fc_1'))
         return self.glimps_net
