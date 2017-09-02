@@ -1,9 +1,10 @@
-from tensorflow.contrib.legacy_seq2seq import rnn_decoder
-from tensorflow.contrib import distributions
 from network import GlimpsNetwork, LocationNetwork
 from tensorflow.examples.tutorials import mnist
-from layer import Dense
+from tensorflow.contrib import distributions
+from seq2seq import rnn_decoder
 from config import *
+
+import tensorlayer as tl
 import tensorflow as tf
 import numpy as np
 
@@ -19,12 +20,8 @@ def getNextRetina(output, i):
     global origin_coor_list
     global sample_coor_list
     global location_network
-    global glimps_network
-
-    #print(location_network.location_net)
-    
+    global glimps_network    
     sample_coor, origin_coor = location_network(output)
-    
     origin_coor_list.append(origin_coor)
     sample_coor_list.append(sample_coor)
     return glimps_network(sample_coor)
@@ -33,7 +30,7 @@ def loglikelihood(mean_arr, sampled_arr, sigma):
     mu = tf.stack(mean_arr)                     # mu = [timesteps, batch_sz, loc_dim]
     sampled = tf.stack(sampled_arr)             # same shape as mu
     gaussian = distributions.Normal(mu, sigma)
-    logll = gaussian.log_prob(sampled)           # [timesteps, batch_sz, loc_dim]
+    logll = gaussian.log_prob(sampled)          # [timesteps, batch_sz, loc_dim]
     logll = tf.reduce_sum(logll, 2)
     logll = tf.transpose(logll)                 # [batch_sz, timesteps]
     return logll
@@ -59,7 +56,9 @@ if __name__ == '__main__':
     outputs, _ = rnn_decoder(input_glimps_tensor_list, init_lstm_state, lstm_cell, loop_function=getNextRetina)
 
     # Construct the classification network
-    logits = Dense(outputs[-1], num_classes, name='classification_net_fc')
+    action_net = tl.layers.InputLayer(outputs[-1])
+    action_net = tl.layers.DenseLayer(action_net, n_units = num_classes, name='classification_net_fc')
+    logits = action_net.outputs
     softmax = tf.nn.softmax(logits)
 
     # Cross-entropy
@@ -89,7 +88,7 @@ if __name__ == '__main__':
     with tf.Session() as sess:
         mnist = mnist.input_data.read_data_sets('MNIST_data', one_hot=False)
         sess.run(tf.global_variables_initializer())
-        for i in range(10000):
+        for i in range(2):
             images, labels = mnist.train.next_batch(batch_size)
             images = np.tile(images, [M, 1])
             labels = np.tile(labels, [M])

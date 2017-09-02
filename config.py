@@ -1,26 +1,15 @@
-win_size = 8
-bandwidth = win_size**2
+win_size = 8                # The size of glimps
 batch_size = 32
-eval_batch_size = 50
 loc_std = 0.22
-original_size = 28
-num_channels = 1
 depth = 1
-sensor_size = win_size**2 * depth
-minRadius = 8
-hg_size = hl_size = 128
-g_size = 256
+hg_size = hl_size = 128     # The vector size for glimps network (before merge)
+g_size = 256                # The size of glimps vector (after merge)
 cell_output_size = 256
-loc_dim = 2
+loc_dim = 2                 # (batch_num, x_coor, y_coor)
 cell_size = 256
 cell_out_size = cell_size
-num_glimpses = 6
-num_classes = 10
+num_glimpses = 6            # The number of glimps that the paper use to get the lowest loss
+num_classes = 10            # MNIST has 10 classes
 max_grad_norm = 5.
-
-step = 100000
-lr_start = 1e-3
-lr_min = 1e-4
-
-# Monte Carlo sampling
-M = 10
+step = 100000               # Epochs
+M = 10                      # Monte Carlo sampling
