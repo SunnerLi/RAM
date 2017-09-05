@@ -15,7 +15,7 @@ Module Structure
 
 ![](https://github.com/SunnerLi/ram/blob/master/img/network.jpg) 
 
-Contritution
+Contribution
 ----
 1. First, the original project I refer cannot execute properly since some API can only support the version which are lower than 1.0.0. This project use more newer API to adapt the current version of Tensorflow.     
 2. Next, I use tensorlayer to simplify some common operations. In original project, the author just use native tensorflow to build the whole module. This change can make the whole program be more clear.    
